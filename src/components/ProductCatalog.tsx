@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Star,
   Plus,
@@ -12,6 +12,7 @@ import {
   Eye,
   X,
   ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import {
   Card,
@@ -30,14 +31,29 @@ import {
   setSelectedCategory,
   setSearchQuery,
   setActiveModalProduct,
+  fetchWebsiteProducts,
+  fetchWebsiteCategories,
   type Product,
 } from "@/redux/slices/productSlice";
 
 export function ProductCatalog() {
   const dispatch = useAppDispatch();
-  const { products, categories, selectedCategory, searchQuery, activeModalProduct } =
-    useAppSelector((state) => state.products);
+  const {
+    products,
+    categories,
+    selectedCategory,
+    searchQuery,
+    activeModalProduct,
+    loading,
+    error,
+  } = useAppSelector((state) => state.products);
   const [addedId, setAddedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // 100% Dynamic data fetching from Express backend & MySQL
+    dispatch(fetchWebsiteProducts());
+    dispatch(fetchWebsiteCategories());
+  }, [dispatch]);
 
   const categoryOptions = ["All", ...categories.map((c) => c.name)];
 
@@ -115,10 +131,20 @@ export function ProductCatalog() {
         })}
       </div>
 
-      {/* Products Grid */}
-      {filteredProducts.length === 0 ? (
+      {/* Loading & Empty State */}
+      {loading && products.length === 0 ? (
+        <div className="text-center py-20 border border-border/60 rounded-2xl bg-card/40 space-y-3">
+          <RefreshCw className="w-6 h-6 text-primary animate-spin mx-auto" />
+          <p className="text-sm font-medium text-foreground">
+            Fetching dynamic solutions from MySQL Database via Drizzle ORM...
+          </p>
+          <p className="text-xs text-muted-foreground">Connecting to localhost:5000/api/products</p>
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-border rounded-2xl bg-card/40">
-          <p className="text-muted-foreground text-sm">No products found matching your search.</p>
+          <p className="text-muted-foreground text-sm">
+            {error ? `Database error: ${error}` : "No products found matching your search."}
+          </p>
           <Button
             variant="outline"
             size="sm"
@@ -126,9 +152,10 @@ export function ProductCatalog() {
             onClick={() => {
               dispatch(setSelectedCategory("All"));
               dispatch(setSearchQuery(""));
+              dispatch(fetchWebsiteProducts());
             }}
           >
-            Clear Filters
+            Refresh Dynamic Records
           </Button>
         </div>
       ) : (
