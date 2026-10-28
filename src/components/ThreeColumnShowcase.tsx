@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { setActiveModalProduct } from "@/redux/slices/productSlice";
-import { addToCart } from "@/redux/slices/cartSlice";
 
 export function ThreeColumnShowcase() {
   const dispatch = useAppDispatch();
@@ -55,10 +54,10 @@ export function ThreeColumnShowcase() {
                 </div>
               ) : (
                 col.items.map((prod) => (
-                  <div
+                  <Link
                     key={prod.id}
-                    onClick={() => dispatch(setActiveModalProduct(prod))}
-                    className="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50/80 transition-colors cursor-pointer group"
+                    href={`/product/${prod.id}`}
+                    className="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50/80 transition-colors group block"
                   >
                     <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
                       <img
@@ -94,7 +93,7 @@ export function ThreeColumnShowcase() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
