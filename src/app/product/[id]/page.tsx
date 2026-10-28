@@ -25,10 +25,11 @@ import { addToCart } from "@/redux/slices/cartSlice";
 import {
   fetchWebsiteProducts,
   type Product,
+  type ProductVariant,
 } from "@/redux/slices/productSlice";
 
-// 6 Color Options matching user reference image
-const COLOR_VARIANTS = [
+// Default Color Options fallback if product doesn't define custom variants
+const DEFAULT_COLOR_VARIANTS: ProductVariant[] = [
   {
     name: "Yellow (হলুদ)",
     slug: "yellow",
@@ -76,7 +77,7 @@ function SingleProductContent() {
   // Gallery & Variant State
   const [activeImage, setActiveImage] = useState<string>("");
   const [validImages, setValidImages] = useState<string[]>([]);
-  const [selectedColor, setSelectedColor] = useState(COLOR_VARIANTS[2]); // Default Sky Blue
+  const [selectedColor, setSelectedColor] = useState<ProductVariant | null>(null);
 
   // Order & Stepper State
   const [quantity, setQuantity] = useState(1);
@@ -88,10 +89,7 @@ function SingleProductContent() {
   const [orderSuccess, setOrderSuccess] = useState<any | null>(null);
   const [cartSuccess, setCartSuccess] = useState(false);
 
-  // Delivery costs
-  const deliveryFee = deliveryArea === "inside" ? 60 : 120;
-
-  // Fetch product data
+  // Fetch product data on mount
   useEffect(() => {
     if (!products.length) {
       dispatch(fetchWebsiteProducts());
@@ -139,28 +137,38 @@ function SingleProductContent() {
     function setupProduct(p: Product) {
       setProduct(p);
 
-      const defaultCookerImages = [
+      // Determine available variants
+      const vars =
+        Array.isArray(p.variants) && p.variants.length > 0
+          ? p.variants
+          : DEFAULT_COLOR_VARIANTS;
+
+      setSelectedColor(vars[0]);
+
+      // Collect gallery images
+      const initialImgs = [
+        p.featuredImage,
+        ...(Array.isArray(p.galleryImages) ? p.galleryImages : []),
+        ...(Array.isArray(p.variants) ? p.variants.map((v) => v.image) : []),
+      ].filter(
+        (img): img is string =>
+          typeof img === "string" &&
+          img.trim() !== "" &&
+          (img.startsWith("http") || img.startsWith("/"))
+      );
+
+      // Unique images
+      const uniqueImgs = Array.from(new Set(initialImgs));
+      const fallbackImgs = [
         "/products/thumb-red.png",
         "/products/cooker-blue-main.png",
         "/products/thumb-yellow.png",
         "/products/thumb-green.png",
       ];
+      const displayImgs = uniqueImgs.length > 0 ? uniqueImgs.slice(0, 8) : fallbackImgs;
 
-      // Build 4 gallery images
-      const initialImgs = [
-        p.featuredImage,
-        ...(Array.isArray(p.galleryImages) ? p.galleryImages : []),
-      ].filter(
-        (img): img is string =>
-          typeof img === "string" &&
-          (img.startsWith("http") || img.startsWith("/"))
-      );
-
-      const fourImgs =
-        initialImgs.length >= 4 ? initialImgs.slice(0, 4) : defaultCookerImages;
-
-      setValidImages(fourImgs);
-      setActiveImage(p.featuredImage || COLOR_VARIANTS[2].image);
+      setValidImages(displayImgs);
+      setActiveImage(p.featuredImage || displayImgs[0]);
     }
 
     if (productId) {
@@ -183,11 +191,11 @@ function SingleProductContent() {
     if (!product) return;
     dispatch(
       addToCart({
-        id: `${product.id}-${selectedColor.slug}`,
-        name: `${product.name} - ${selectedColor.name}`,
+        id: `${product.id}-${selectedColor?.slug || "default"}`,
+        name: `${product.name}${selectedColor ? ` - ${selectedColor.name}` : ""}`,
         price: product.salePrice,
-        category: "",
-        image: activeImage || product.featuredImage || "🧸",
+        category: product.category || "",
+        image: activeImage || product.featuredImage || "🍲",
       })
     );
     setCartSuccess(true);
@@ -200,12 +208,44 @@ function SingleProductContent() {
   };
 
   // Calculations
-  const unitPrice = product?.salePrice || 999;
-  const regularPrice = product?.regularPrice || 1499;
+  const unitPrice = product?.salePrice || 0;
+  const regularPrice = product?.regularPrice || unitPrice;
   const savingsAmount = Math.max(0, regularPrice - unitPrice);
+
+  // Delivery Charges (100% dynamic from backend)
+  const deliveryInsideFee =
+    product?.deliveryInside !== undefined ? product.deliveryInside : 60;
+  const deliveryOutsideFee =
+    product?.deliveryOutside !== undefined ? product.deliveryOutside : 120;
+  const deliveryFee =
+    deliveryArea === "inside" ? deliveryInsideFee : deliveryOutsideFee;
+
   const itemsTotal = unitPrice * quantity;
   const grandTotal = itemsTotal + deliveryFee;
-  const skuString = `${(product?.slug || product?.id || "PRESTIGE-COOKER").toUpperCase()}-${selectedColor.slug.toUpperCase()}`;
+
+  const skuString = `${(product?.slug || product?.id || "PROD").toUpperCase()}${
+    selectedColor ? `-${selectedColor.slug.toUpperCase()}` : ""
+  }`;
+
+  // Contact info
+  const phoneNumber = product?.phoneNumber || "0123456789";
+  const whatsappNumber = product?.whatsappNumber || "880123456789";
+
+  // Key Features list
+  const keyFeaturesList =
+    product?.keyFeatures && product.keyFeatures.length > 0
+      ? product.keyFeatures
+      : [
+          `মডেল: ${product?.name || ""}`,
+          `ক্যাটাগরি: ${product?.category || "Kitchen & Home"}`,
+          `ওয়ারেন্টি: সার্ভিস ওয়ারেন্টি প্রযোজ্য`,
+        ];
+
+  // Variants list
+  const availableVariants =
+    product?.variants && product.variants.length > 0
+      ? product.variants
+      : DEFAULT_COLOR_VARIANTS;
 
   // Related products from Redux (excluding current product)
   const relatedProducts = products
@@ -230,12 +270,12 @@ function SingleProductContent() {
         phone: phone.trim(),
         address: `${address.trim()} (এলাকা: ${
           deliveryArea === "inside" ? "ঢাকা সিটির ভেতরে" : "ঢাকা সিটির বাইরে"
-        }, কালার: ${selectedColor.name})`,
+        }${selectedColor ? `, কালার: ${selectedColor.name}` : ""})`,
         deliveryFee,
         items: [
           {
             id: product.id,
-            name: `${product.name} (${selectedColor.name})`,
+            name: `${product.name}${selectedColor ? ` (${selectedColor.name})` : ""}`,
             price: product.salePrice,
             quantity: quantity,
           },
@@ -257,8 +297,11 @@ function SingleProductContent() {
           customerName,
           phone,
           address,
-          selectedColor: selectedColor.name,
-          deliveryArea: deliveryArea === "inside" ? "ঢাকা সিটি (৳৬০)" : "ঢাকার বাইরে (৳১২০)",
+          selectedColor: selectedColor?.name || "Standard",
+          deliveryArea:
+            deliveryArea === "inside"
+              ? `ঢাকা সিটি (৳${deliveryInsideFee})`
+              : `ঢাকার বাইরে (৳${deliveryOutsideFee})`,
           quantity,
           productName: product.name,
           grandTotal,
@@ -343,19 +386,19 @@ function SingleProductContent() {
             </div>
             <button
               onClick={() => setOrderSuccess(null)}
-              className="px-6 py-2 rounded-md bg-[#2b3990] text-white font-bold text-xs"
+              className="px-6 py-2 rounded-md bg-[#2b3990] text-white font-bold text-xs cursor-pointer"
             >
               আরেকটি অর্ডার করুন
             </button>
           </div>
         )}
 
-        {/* 1. TOP HERO CARD (MATCHING USER IMAGE 1 EXACTLY) */}
+        {/* 1. TOP HERO CARD */}
         <div className="bg-white rounded-md border border-gray-200 shadow-xs p-4 sm:p-7 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Column: Product Gallery with SAVE Badge & 4 Thumbnails (5 Cols) */}
+          {/* Left Column: Product Gallery with SAVE Badge & Thumbnails (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Main Image with SAVE ৳ badge */}
+            {/* Main Image with SAVE badge */}
             <div className="relative aspect-square w-full rounded-md border border-gray-100 flex items-center justify-center p-3 bg-white overflow-hidden">
               {savingsAmount > 0 && (
                 <div className="absolute top-0 left-0 bg-[#e53e3e] text-white text-[11px] font-bold px-3 py-1 uppercase tracking-wider rounded-br-sm shadow-xs z-10">
@@ -369,7 +412,7 @@ function SingleProductContent() {
               />
             </div>
 
-            {/* 4 Square Thumbnails Strip */}
+            {/* Thumbnails Strip */}
             <div className="grid grid-cols-4 gap-2.5">
               {validImages.map((img, idx) => (
                 <button
@@ -385,7 +428,7 @@ function SingleProductContent() {
                   <img
                     src={img}
                     alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </button>
               ))}
@@ -401,11 +444,15 @@ function SingleProductContent() {
               </h1>
               <div className="border-b border-gray-200 mt-2.5 mb-2.5" />
               
-              {/* Meta info */}
+              {/* Meta info (Brand, SKU, Status) */}
               <div className="text-xs text-gray-500 space-y-1">
                 <div>
                   <span className="text-gray-600">Brand:</span>{" "}
-                  <span className="text-gray-900 font-semibold">Prestige</span>
+                  <span className="text-gray-900 font-semibold">{product.brand || "Prestige"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Category:</span>{" "}
+                  <span className="text-gray-900 font-semibold">{product.category}</span>
                 </div>
                 <div>
                   <span className="text-gray-600">Product Code:</span>{" "}
@@ -413,45 +460,55 @@ function SingleProductContent() {
                 </div>
                 <div>
                   <span className="text-gray-600">Status:</span>{" "}
-                  <span className="text-emerald-600 font-semibold">In Stock</span>
+                  <span
+                    className={`font-semibold ${
+                      product.stock !== undefined && product.stock <= 0
+                        ? "text-red-600"
+                        : "text-emerald-600"
+                    }`}
+                  >
+                    {product.stock !== undefined && product.stock <= 0
+                      ? "Out of Stock"
+                      : "In Stock"}
+                  </span>
                 </div>
               </div>
               <div className="border-b border-gray-200 mt-2.5 mb-3" />
             </div>
 
-            {/* KEY FEATURES with red bar indicator */}
-            <div className="space-y-1.5">
-              <div className="border-l-[3px] border-red-600 pl-2 font-bold text-xs uppercase tracking-wide text-gray-800">
-                KEY FEATURES
+            {/* KEY FEATURES (Dynamic from MySQL / Admin) */}
+            {keyFeaturesList.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="border-l-[3px] border-red-600 pl-2 font-bold text-xs uppercase tracking-wide text-gray-800">
+                  KEY FEATURES
+                </div>
+                <ul className="text-xs text-gray-700 space-y-1 leading-relaxed pl-2 font-normal">
+                  {keyFeaturesList.map((feat, idx) => {
+                    const colonIdx = feat.indexOf(":");
+                    if (colonIdx !== -1) {
+                      const label = feat.slice(0, colonIdx);
+                      const val = feat.slice(colonIdx + 1);
+                      return (
+                        <li key={idx}>
+                          <strong className="text-gray-900">{label}:</strong>
+                          {val}
+                        </li>
+                      );
+                    }
+                    return <li key={idx}>{feat}</li>;
+                  })}
+                </ul>
               </div>
-              <ul className="text-xs text-gray-700 space-y-1 leading-relaxed pl-2 font-normal">
-                <li>
-                  <strong className="text-gray-900">মডেল:</strong>{" "}
-                  {product.name.includes("Prestige")
-                    ? "Prestige Mukti Multi Purpose Cooker (3.0L)"
-                    : product.name}
-                </li>
-                <li>
-                  <strong className="text-gray-900">পাওয়ার:</strong> 1500 Watt (দ্রুত রান্নার জন্য শক্তিশালী)
-                </li>
-                <li>
-                  <strong className="text-gray-900">ধারণক্ষমতা:</strong> ৩.০ লিটার
-                </li>
-                <li>
-                  <strong className="text-gray-900">প্যাকেজ:</strong> ১টি মাল্টি কুকার, ১টি স্টিমার পট, ১টি কাঁচের ঢাকনা এবং ফ্রি এক্সেসরিজ।
-                </li>
-                <li>
-                  <strong className="text-gray-900">ওয়ারেন্টি:</strong> ১২ মাসের সার্ভিস ওয়ারেন্টি (কার্ড)
-                </li>
-              </ul>
-            </div>
+            )}
 
-            {/* PRICE HIGHLIGHT BOX (EXACT MATCH TO REFERENCE) */}
+            {/* PRICE HIGHLIGHT BOX */}
             <div className="bg-[#fbfbfb] border border-gray-200 rounded-md p-3.5 sm:p-4 space-y-1">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="text-sm text-gray-400 line-through">
-                  ৳{regularPrice}
-                </span>
+                {savingsAmount > 0 && (
+                  <span className="text-sm text-gray-400 line-through">
+                    ৳{regularPrice}
+                  </span>
+                )}
                 <span className="text-2xl sm:text-3xl font-extrabold text-[#e53e3e]">
                   ৳{unitPrice}
                 </span>
@@ -462,49 +519,55 @@ function SingleProductContent() {
                 )}
               </div>
               <p className="text-[11px] text-gray-500">
-                Price includes VAT. Free delivery inside Dhaka city on orders above ৳5,000.
+                Price includes VAT. Free delivery inside Dhaka city on bulk orders.
               </p>
             </div>
 
-            {/* COLOR / VARIANT SELECTOR */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-700 font-medium">
-                  আপনার পছন্দের কুকারের কালার সিলেক্ট করুন নিচে থেকে ।{" "}
-                  <span className="text-gray-400">6 options</span>
-                </span>
-                <span className="font-bold text-gray-900">{selectedColor.name}</span>
-              </div>
+            {/* COLOR / VARIANT SELECTOR (Dynamic from MySQL / Admin) */}
+            {availableVariants.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-700 font-medium">
+                    আপনার পছন্দের কুকার/কালার সিলেক্ট করুন নিচে থেকে ।{" "}
+                    <span className="text-gray-400">{availableVariants.length} options</span>
+                  </span>
+                  {selectedColor && (
+                    <span className="font-bold text-gray-900">{selectedColor.name}</span>
+                  )}
+                </div>
 
-              {/* 6 Variant Pill Buttons */}
-              <div className="flex flex-wrap gap-2">
-                {COLOR_VARIANTS.map((col) => {
-                  const isSelected = selectedColor.slug === col.slug;
-                  return (
-                    <button
-                      key={col.slug}
-                      type="button"
-                      onClick={() => {
-                        setSelectedColor(col);
-                        setActiveImage(col.image);
-                      }}
-                      className={`px-3.5 py-1.5 rounded-md text-xs font-medium border cursor-pointer transition-all ${
-                        isSelected
-                          ? "border-2 border-gray-900 text-gray-900 bg-white font-bold shadow-xs"
-                          : "border-gray-300 text-gray-700 hover:border-gray-400 bg-white"
-                      }`}
-                    >
-                      {col.name}
-                    </button>
-                  );
-                })}
+                {/* Variant Pill Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  {availableVariants.map((col) => {
+                    const isSelected = selectedColor?.slug === col.slug;
+                    return (
+                      <button
+                        key={col.slug}
+                        type="button"
+                        onClick={() => {
+                          setSelectedColor(col);
+                          if (col.image) setActiveImage(col.image);
+                        }}
+                        className={`px-3.5 py-1.5 rounded-md text-xs font-medium border cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-2 border-gray-900 text-gray-900 bg-white font-bold shadow-xs"
+                            : "border-gray-300 text-gray-700 hover:border-gray-400 bg-white"
+                        }`}
+                      >
+                        {col.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Price & SKU line (Matching Image 1) */}
+            {/* Price & SKU line */}
             <div className="flex items-center gap-3 text-xs pt-1">
               <span className="text-[#e53e3e] font-bold text-base">{unitPrice} ৳</span>
-              <span className="text-gray-400 line-through text-xs">{regularPrice} ৳</span>
+              {savingsAmount > 0 && (
+                <span className="text-gray-400 line-through text-xs">{regularPrice} ৳</span>
+              )}
               <span className="text-[#2b3990] font-mono text-[11px] font-semibold">
                 SKU: {skuString}
               </span>
@@ -517,7 +580,7 @@ function SingleProductContent() {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-3 py-2 text-gray-600 hover:bg-gray-100 text-xs font-bold"
+                  className="px-3 py-2 text-gray-600 hover:bg-gray-100 text-xs font-bold cursor-pointer"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
@@ -527,7 +590,7 @@ function SingleProductContent() {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-2 text-gray-600 hover:bg-gray-100 text-xs font-bold"
+                  className="px-3 py-2 text-gray-600 hover:bg-gray-100 text-xs font-bold cursor-pointer"
                 >
                   <Plus className="w-3 h-3" />
                 </button>
@@ -554,21 +617,23 @@ function SingleProductContent() {
               </button>
             </div>
 
-            {/* SECONDARY CALL & WHATSAPP BUTTONS ROW */}
+            {/* SECONDARY CALL & WHATSAPP BUTTONS (Dynamic phone & whatsapp) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
               {/* কল করে অর্ডার করুন */}
               <a
-                href="tel:0123456789"
+                href={`tel:${phoneNumber}`}
                 className="py-2.5 px-4 rounded-md bg-[#ebf4ff] hover:bg-blue-100 text-[#1e40af] border border-blue-200 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <PhoneCall className="w-4 h-4" />
-                <span>কল করে অর্ডার করুন</span>
+                <span>কল করে অর্ডার করুন ({phoneNumber})</span>
               </a>
 
               {/* হোয়াটসঅ্যাপে অর্ডার করুন */}
               <a
-                href={`https://wa.me/880123456789?text=${encodeURIComponent(
-                  `হ্যালো! আমি '${product.name}' (${selectedColor.name}) মূল্য: ৳${product.salePrice} অর্ডার করতে চাই।`
+                href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                  `হ্যালো! আমি '${product.name}' ${
+                    selectedColor ? `(${selectedColor.name})` : ""
+                  } মূল্য: ৳${product.salePrice} অর্ডার করতে চাই।`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -581,7 +646,7 @@ function SingleProductContent() {
           </div>
         </div>
 
-        {/* 2. DESCRIPTION & RELATED PRODUCTS (MATCHING USER IMAGE 2 EXACTLY) */}
+        {/* 2. DESCRIPTION & RELATED PRODUCTS */}
         <div className="space-y-4">
           {/* Tabs bar */}
           <div className="bg-white rounded-md border border-gray-200 px-4 py-2.5">
@@ -596,7 +661,7 @@ function SingleProductContent() {
             {/* Left Column (8 Cols): DESCRIPTION & PLACE YOUR ORDER */}
             <div className="lg:col-span-8 space-y-6">
               
-              {/* DESCRIPTION CARD */}
+              {/* DESCRIPTION CARD (100% Dynamic from Backend) */}
               <div className="bg-white rounded-md border border-gray-200 p-5 sm:p-7 space-y-4 shadow-xs">
                 <div className="border-l-[3px] border-red-600 pl-2 font-bold text-sm uppercase tracking-wide text-gray-900">
                   DESCRIPTION
@@ -604,41 +669,49 @@ function SingleProductContent() {
 
                 <div className="space-y-4 text-xs sm:text-sm text-gray-700 leading-relaxed">
                   <h3 className="font-bold text-base text-gray-900">
-                    {product.name} - অল-ইন-ওয়ান কুকিং সল্যুশন!
+                    {product.name}
                   </h3>
 
-                  <p>
-                    আপনার রান্নার কাজকে আরও সহজ এবং বৈচিত্র্যময় করতে Prime Essential Store নিয়ে এলো Prestige ৩.০ লিটার মাল্টি-পারপাস কুকার। এটি দিয়ে আপনি একই সাথে রান্না এবং ভাপে সেদ্ধ (Steaming) করার কাজ সেরে নিতে পারবেন।
-                  </p>
+                  {product.description && (
+                    <div
+                      className="text-gray-700 leading-relaxed text-xs sm:text-sm space-y-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-bold [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_*]:!bg-transparent"
+                      dangerouslySetInnerHTML={{ __html: product.description }}
+                    />
+                  )}
 
-                  <div className="space-y-2 pt-1">
-                    <h4 className="font-bold text-gray-900 text-sm">
-                      কেন এটি আপনার পছন্দের তালিকায় থাকবে?
-                    </h4>
-                    <ul className="space-y-2 pl-1">
-                      <li>
-                        <strong className="text-gray-900">মাল্টি-ফাংশনাল:</strong> নুডলস, ওটমিল, স্যুপ রান্না করা ছাড়াও এর সাথে থাকা স্টিমার দিয়ে মোমো, ডিম বা সবজি ভাপে সেদ্ধ করা যায়।
-                      </li>
-                      <li>
-                        <strong className="text-gray-900">নন-স্টিক ইনার পট:</strong> এর ভেতরের অংশ নন-স্টিক কোটিং করা, তাই খাবার পুড়ে লেগে যায় না এবং খুব সহজে পরিষ্কার করা যায়।
-                      </li>
-                      <li>
-                        <strong className="text-gray-900">১৫০০ ওয়াট পাওয়ার:</strong> শক্তিশালী মোটর দ্রুত রান্না নিশ্চিত করে, যা আপনার সময় বাঁচায়।
-                      </li>
-                      <li>
-                        <strong className="text-gray-900">কমপ্যাক্ট ডিজাইন:</strong> আধুনিক ও আকর্ষণীয় ডিজাইন যা আপনার রান্নাঘরের সৌন্দর্য বাড়াবে।
-                      </li>
-                    </ul>
-                  </div>
+                  {/* Benefits Array */}
+                  {product.benefits && product.benefits.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <h4 className="font-bold text-gray-900 text-sm">
+                        কেন এটি আপনার পছন্দের তালিকায় থাকবে?
+                      </h4>
+                      <ul className="space-y-2 pl-1">
+                        {product.benefits.map((b, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-red-600 font-bold">•</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                  <div className="space-y-1.5 pt-1">
-                    <h4 className="font-bold text-gray-900 text-sm">
-                      প্যাকেজে যা যা থাকছে:
-                    </h4>
-                    <p className="text-gray-600">
-                      ১. ১টি মেইন কুকিং ইউনিট (৩.০ লিটার) ২. ১টি স্টিমার পট (ভাপে রান্নার জন্য) ৩. ১টি ট্রান্সপারেন্ট গ্লাস লিড (ঢাকনা) ৪. ১টি প্লাস্টিক চামচ ও মেজারিং কাপ (ফ্রি)
-                    </p>
-                  </div>
+                  {/* Facilities / Package Array */}
+                  {product.facilities && product.facilities.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <h4 className="font-bold text-gray-900 text-sm">
+                        প্যাকেজে যা যা থাকছে / বিশেষ সুবিধাসমূহ:
+                      </h4>
+                      <ul className="space-y-1.5 pl-1">
+                        {product.facilities.map((fac, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-gray-600">
+                            <span className="text-emerald-600 font-bold">✔</span>
+                            <span>{fac}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -705,7 +778,7 @@ function SingleProductContent() {
                     </div>
                   </div>
 
-                  {/* Delivery Area Options */}
+                  {/* Delivery Area Options (Dynamic Fees from Product) */}
                   <div className="space-y-1.5 pt-1">
                     <label className="block text-xs font-bold text-gray-700">
                       ডেলিভারি এলাকা সিলেক্ট করুন
@@ -731,7 +804,7 @@ function SingleProductContent() {
                             ঢাকা সিটির ভেতরে (২৪-৪৮ ঘণ্টা)
                           </span>
                         </div>
-                        <span className="font-bold text-xs text-gray-900">৳৬০</span>
+                        <span className="font-bold text-xs text-gray-900">৳{deliveryInsideFee}</span>
                       </label>
 
                       <label
@@ -754,7 +827,7 @@ function SingleProductContent() {
                             ঢাকা সিটির বাইরে (২-৩ দিন)
                           </span>
                         </div>
-                        <span className="font-bold text-xs text-gray-900">৳১২০</span>
+                        <span className="font-bold text-xs text-gray-900">৳{deliveryOutsideFee}</span>
                       </label>
                     </div>
                   </div>
@@ -762,7 +835,10 @@ function SingleProductContent() {
                   {/* Order Calculation Summary */}
                   <div className="bg-gray-50 border border-gray-200 rounded-md p-3.5 space-y-1.5 text-xs">
                     <div className="flex justify-between text-gray-600">
-                      <span>পণ্যের দাম ({quantity} পিস - {selectedColor.name}):</span>
+                      <span>
+                        পণ্যের দাম ({quantity} পিস
+                        {selectedColor ? ` - ${selectedColor.name}` : ""}):
+                      </span>
                       <span>৳ {itemsTotal}</span>
                     </div>
                     <div className="flex justify-between text-gray-600">

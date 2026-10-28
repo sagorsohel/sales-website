@@ -2,10 +2,17 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
 const API_BASE = "http://localhost:5000/api";
 
+export interface ProductVariant {
+  name: string;
+  slug: string;
+  image: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   slug?: string;
+  brand?: string;
   description: string;
   category: string;
   regularPrice: number;
@@ -13,15 +20,23 @@ export interface Product {
   discountPercentage: number;
   featuredImage: string;
   galleryImages: string[];
+  variants?: ProductVariant[];
+  keyFeatures?: string[];
   benefits: string[];
   facilities: string[];
+  deliveryInside?: number;
+  deliveryOutside?: number;
+  phoneNumber?: string;
+  whatsappNumber?: string;
   seoTitle?: string;
   seoDescription?: string;
   seoImage?: string;
   rating: number;
+  salesCount?: number;
   badge?: string;
   icon: string;
-  inStock: boolean;
+  inStock?: boolean;
+  status?: string;
   stock?: number;
 }
 
