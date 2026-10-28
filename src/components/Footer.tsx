@@ -1,16 +1,56 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   MapPin,
   Phone,
   Mail,
   Camera,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
 } from "lucide-react";
 
 export function Footer() {
+  const pathname = usePathname();
+  const isProductPage = pathname?.startsWith("/product/");
+
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+
+  // Clean, fresh footer for product landing page
+  if (isProductPage) {
+    return (
+      <footer className="w-full bg-slate-900 text-white mt-16 py-10 border-t border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 text-center space-y-6">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-gray-300 font-semibold">
+            <span className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-emerald-400" />
+              <span>সারাদেশে হোম ডেলিভারি</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>১০০% ক্যাশ অন ডেলিভারি</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <RotateCcw className="w-4 h-4 text-emerald-400" />
+              <span>৭ দিনের ফ্রি রিপ্লেসমেন্ট</span>
+            </span>
+          </div>
+
+          <div className="text-xs text-gray-400 max-w-md mx-auto space-y-1">
+            <p>অর্ডার সংক্রান্ত যেকোনো সহায়তায় সরাসরি কল করুন:</p>
+            <p className="text-base font-bold text-white tracking-wider">0123-456-789</p>
+          </div>
+
+          <div className="border-t border-slate-800/80 pt-6 text-[11px] text-gray-500">
+            © 2026 Kiddle Online Store. All Rights Reserved.
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();

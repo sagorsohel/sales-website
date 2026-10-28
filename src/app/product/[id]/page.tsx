@@ -294,31 +294,38 @@ function SingleProductContent() {
 
   return (
     <div className="bg-[#f8fafc] text-gray-800 min-h-screen pb-20">
-      {/* 1. TOP URGENCY & COUNTDOWN ANNOUNCEMENT BAR */}
-      <div className="bg-gradient-to-r from-[#e11d48] via-[#f43f5e] to-[#fb7185] text-white py-2.5 px-4 shadow-sm sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm">
-          <div className="flex items-center gap-2 font-bold tracking-wide">
-            <Flame className="w-4 h-4 text-yellow-300 animate-bounce" />
-            <span>স্পেশাল ডিসকাউন্ট অফার! অফারটি শেষ হতে বাকি:</span>
+      {/* 1. FRESH TOP URGENCY & COUNTDOWN BAR */}
+      <div className="bg-[#0f172a] text-white py-2.5 px-4 shadow-xs border-b border-slate-800">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs">
+          <div className="flex items-center gap-2 font-semibold">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+            </span>
+            <span className="text-gray-200">
+              🔥 বিশেষ ধামাকা ডিসকাউন্ট অফার! অফারটি শেষ হতে বাকি:
+            </span>
           </div>
 
-          <div className="flex items-center gap-3 font-mono font-black text-xs sm:text-sm bg-black/20 px-3 py-1 rounded-full">
-            <span className="bg-white/20 px-2 py-0.5 rounded">
+          <div className="flex items-center gap-2 font-mono font-bold text-xs bg-slate-800/90 border border-slate-700/80 px-3 py-1 rounded-full shadow-inner">
+            <span className="text-white bg-slate-900 px-2 py-0.5 rounded">
               {String(timeLeft.hours).padStart(2, "0")}h
             </span>
-            <span>:</span>
-            <span className="bg-white/20 px-2 py-0.5 rounded">
+            <span className="text-gray-400">:</span>
+            <span className="text-white bg-slate-900 px-2 py-0.5 rounded">
               {String(timeLeft.minutes).padStart(2, "0")}m
             </span>
-            <span>:</span>
-            <span className="bg-white/20 px-2 py-0.5 rounded text-yellow-300">
+            <span className="text-gray-400">:</span>
+            <span className="text-rose-400 bg-slate-900 px-2 py-0.5 rounded">
               {String(timeLeft.seconds).padStart(2, "0")}s
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-1.5 font-semibold text-xs">
-            <PhoneCall className="w-3.5 h-3.5 text-yellow-300" />
-            <span>সরাসরি কল করুন: 0123-456-789</span>
+          <div className="hidden md:flex items-center gap-2 text-gray-300 font-medium">
+            <span>📞 হটলাইন:</span>
+            <a href="tel:0123456789" className="text-amber-400 font-bold hover:underline">
+              0123-456-789
+            </a>
           </div>
         </div>
       </div>

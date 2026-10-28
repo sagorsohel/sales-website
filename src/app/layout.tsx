@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -34,10 +35,14 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         <ReduxProvider>
-          <Navbar />
+          <Suspense fallback={null}>
+            <Navbar />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <CartDrawer />
-          <Footer />
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
         </ReduxProvider>
       </body>
     </html>
