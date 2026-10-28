@@ -33,7 +33,10 @@ import {
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addToCart } from "@/redux/slices/cartSlice";
-import { fetchWebsiteProducts, type Product } from "@/redux/slices/productSlice";
+import {
+  fetchWebsiteProducts,
+  type Product,
+} from "@/redux/slices/productSlice";
 
 function SingleProductContent() {
   const params = useParams();
@@ -63,7 +66,9 @@ function SingleProductContent() {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [deliveryArea, setDeliveryArea] = useState<"inside" | "outside">("inside");
+  const [deliveryArea, setDeliveryArea] = useState<"inside" | "outside">(
+    "inside",
+  );
   const [quantity, setQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState<any | null>(null);
@@ -88,7 +93,7 @@ function SingleProductContent() {
 
       // Check Redux
       const foundInRedux = products.find(
-        (p) => p.id === productId || p.slug === productId
+        (p) => p.id === productId || p.slug === productId,
       );
 
       if (foundInRedux) {
@@ -101,7 +106,9 @@ function SingleProductContent() {
 
       // Fetch from API directly
       try {
-        const res = await fetch(`http://localhost:5000/api/products/${productId}`);
+        const res = await fetch(
+          `http://localhost:5000/api/products/${productId}`,
+        );
         const data = await res.json();
         if (isMounted) {
           if (data.success && data.data) {
@@ -112,7 +119,9 @@ function SingleProductContent() {
         }
       } catch (err: any) {
         if (isMounted) {
-          setError(err.message || "সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।");
+          setError(
+            err.message || "সার্ভারের সাথে সংযোগ স্থাপন করা সম্ভব হয়নি।",
+          );
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -124,7 +133,10 @@ function SingleProductContent() {
       const fallbackImgs = [
         p.featuredImage,
         ...(Array.isArray(p.galleryImages) ? p.galleryImages : []),
-      ].filter((img): img is string => typeof img === "string" && img.startsWith("http"));
+      ].filter(
+        (img): img is string =>
+          typeof img === "string" && img.startsWith("http"),
+      );
 
       const finalImgs =
         fallbackImgs.length > 0
@@ -182,7 +194,7 @@ function SingleProductContent() {
         price: product.salePrice,
         category: product.category,
         image: product.icon || "🧸",
-      })
+      }),
     );
     setCartSuccess(true);
     setTimeout(() => setCartSuccess(false), 2000);
@@ -190,7 +202,8 @@ function SingleProductContent() {
 
   const handlePrevImage = () => {
     if (!validImages.length) return;
-    const nextIdx = (activeImageIndex - 1 + validImages.length) % validImages.length;
+    const nextIdx =
+      (activeImageIndex - 1 + validImages.length) % validImages.length;
     setActiveImageIndex(nextIdx);
     setActiveImage(validImages[nextIdx]);
   };
@@ -219,7 +232,9 @@ function SingleProductContent() {
     if (!product) return;
 
     if (!customerName.trim() || !phone.trim() || !address.trim()) {
-      alert("অনুগ্রহ করে আপনার নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানা সঠিকভাবে লিখুন।");
+      alert(
+        "অনুগ্রহ করে আপনার নাম, মোবাইল নাম্বার এবং সম্পূর্ণ ঠিকানা সঠিকভাবে লিখুন।",
+      );
       return;
     }
 
@@ -254,11 +269,15 @@ function SingleProductContent() {
 
       if (json.success) {
         setOrderSuccess({
-          orderId: json.data?.id || `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+          orderId:
+            json.data?.id || `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
           customerName,
           phone,
           address,
-          deliveryArea: deliveryArea === "inside" ? "ঢাকা সিটি (৳৬০)" : "ঢাকার বাইরে (৳১২০)",
+          deliveryArea:
+            deliveryArea === "inside"
+              ? "ঢাকা সিটি (৳৬০)"
+              : "ঢাকার বাইরে (৳১২০)",
           quantity,
           productName: product.name,
           grandTotal,
@@ -267,10 +286,14 @@ function SingleProductContent() {
           window.scrollTo({ top: 0, behavior: "smooth" });
         }, 100);
       } else {
-        alert(json.message || "অর্ডার সম্পন্ন হতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+        alert(
+          json.message || "অর্ডার সম্পন্ন হতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+        );
       }
     } catch (err: any) {
-      alert("অর্ডার পাঠাতে ব্যর্থ হয়েছে। অনুগ্রহ করে ইন্টারনেট বা সার্ভার চেক করুন।");
+      alert(
+        "অর্ডার পাঠাতে ব্যর্থ হয়েছে। অনুগ্রহ করে ইন্টারনেট বা সার্ভার চেক করুন।",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -352,7 +375,10 @@ function SingleProductContent() {
 
           <div className="hidden md:flex items-center gap-2 text-slate-300 font-medium">
             <span>📞 সরাসরি কল করুন:</span>
-            <a href="tel:0123456789" className="text-amber-400 font-bold hover:underline">
+            <a
+              href="tel:0123456789"
+              className="text-amber-400 font-bold hover:underline"
+            >
               0123-456-789
             </a>
           </div>
@@ -375,7 +401,9 @@ function SingleProductContent() {
                 🎉 অভিনন্দন {orderSuccess.customerName}!
               </h2>
               <p className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-                আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে। আমাদের কাস্টমার সার্ভিস প্রতিনিধি শীঘ্রই আপনার মোবাইল নাম্বারে কল করে অর্ডারটি চূড়ান্ত কনফার্ম করবেন।
+                আপনার অর্ডারটি সফলভাবে গ্রহণ করা হয়েছে। আমাদের কাস্টমার সার্ভিস
+                প্রতিনিধি শীঘ্রই আপনার মোবাইল নাম্বারে কল করে অর্ডারটি চূড়ান্ত
+                কনফার্ম করবেন।
               </p>
             </div>
 
@@ -393,11 +421,17 @@ function SingleProductContent() {
                 </span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-500 font-medium">মোবাইল নাম্বার:</span>
-                <span className="font-semibold text-slate-800">{orderSuccess.phone}</span>
+                <span className="text-gray-500 font-medium">
+                  মোবাইল নাম্বার:
+                </span>
+                <span className="font-semibold text-slate-800">
+                  {orderSuccess.phone}
+                </span>
               </div>
               <div className="flex justify-between border-b pb-2">
-                <span className="text-gray-500 font-medium">ডেলিভারি ঠিকানা:</span>
+                <span className="text-gray-500 font-medium">
+                  ডেলিভারি ঠিকানা:
+                </span>
                 <span className="font-semibold text-slate-800 text-right">
                   {orderSuccess.address}
                 </span>
@@ -432,27 +466,9 @@ function SingleProductContent() {
         </div>
       )}
 
-      {/* 3. BREADCRUMB */}
-      <div className="max-w-6xl mx-auto px-4 py-4">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link href="/" className="hover:text-rose-600 transition-colors">
-            হোম
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-          <span className="hover:text-rose-600 cursor-pointer font-medium">
-            {product.category || "টয় ও গ্যাজেট"}
-          </span>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-          <span className="text-slate-800 font-bold truncate max-w-[200px] sm:max-w-none">
-            {product.name}
-          </span>
-        </div>
-      </div>
-
       {/* 4. MAIN HERO SECTION (FULL IMAGE & FRESH PRESENTATION) */}
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-3xl p-5 sm:p-8 md:p-10 border border-slate-100 shadow-sm grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          
           {/* Left Column: FULL-SIZE GORGEOUS IMAGE DISPLAY (6 Cols) */}
           <div className="lg:col-span-6 space-y-4">
             {/* Main Stage Image (Full & Edge-to-Edge) */}
@@ -557,7 +573,10 @@ function SingleProductContent() {
               <div className="flex items-center gap-2 mb-2.5">
                 <div className="flex items-center text-amber-400">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    <Star
+                      key={i}
+                      className="w-4 h-4 fill-amber-400 text-amber-400"
+                    />
                   ))}
                 </div>
                 <span className="text-xs font-bold text-slate-700">
@@ -571,15 +590,22 @@ function SingleProductContent() {
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 leading-tight">
                 {product.name}
               </h1>
-              <p className="text-xs text-slate-400 mt-1.5 font-medium">
-                ক্যাটাগরি: <span className="text-slate-800 font-bold">{product.category}</span>
-              </p>
+              <div className="flex items-center gap-2.5 mt-2 text-xs text-slate-500 font-medium">
+                <span className="inline-flex items-center gap-1.5 text-emerald-600 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  রেডি স্টক
+                </span>
+                <span>•</span>
+                <span>১০০% অরিজিনাল কোয়ালিটি গ্যারান্টি</span>
+              </div>
             </div>
 
             {/* Price Showcase Card */}
             <div className="bg-gradient-to-br from-rose-50 via-white to-orange-50/50 border border-rose-200/80 rounded-3xl p-5 sm:p-6 shadow-xs">
               <div className="flex flex-wrap items-baseline gap-3">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">অফার মূল্য:</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  অফার মূল্য:
+                </span>
                 <span className="text-3xl sm:text-5xl font-black text-rose-600 font-mono tracking-tight">
                   ৳ {unitPrice}
                 </span>
@@ -596,7 +622,9 @@ function SingleProductContent() {
               </div>
               <p className="text-xs text-slate-600 mt-2.5 flex items-center gap-1.5 font-semibold">
                 <Clock className="w-4 h-4 text-rose-500" />
-                <span>সীমিত সময়ের বিশেষ অফার! সারাদেশে দ্রুত ক্যাশ অন ডেলিভারি।</span>
+                <span>
+                  সীমিত সময়ের বিশেষ অফার! সারাদেশে দ্রুত ক্যাশ অন ডেলিভারি।
+                </span>
               </p>
             </div>
 
@@ -607,7 +635,10 @@ function SingleProductContent() {
               </h4>
               <div className="space-y-2.5 text-xs sm:text-sm text-slate-700">
                 {benefitsList.slice(0, 4).map((b, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 bg-slate-50/80 p-2.5 rounded-xl border border-slate-100"
+                  >
                     <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                     <span className="font-medium">{b}</span>
                   </div>
@@ -633,12 +664,14 @@ function SingleProductContent() {
                   className="py-3 px-4 rounded-xl border-2 border-slate-900 hover:bg-slate-900 hover:text-white text-slate-900 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  <span>{cartSuccess ? "কার্টে যোগ হয়েছে!" : "কার্টে যোগ করুন"}</span>
+                  <span>
+                    {cartSuccess ? "কার্টে যোগ হয়েছে!" : "কার্টে যোগ করুন"}
+                  </span>
                 </button>
 
                 <a
                   href={`https://wa.me/880123456789?text=${encodeURIComponent(
-                    `হ্যালো! আমি '${product.name}' (মূল্য: ৳${product.salePrice}) সরাসরি অর্ডার করতে চাই।`
+                    `হ্যালো! আমি '${product.name}' (মূল্য: ৳${product.salePrice}) সরাসরি অর্ডার করতে চাই।`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -655,13 +688,15 @@ function SingleProductContent() {
               <div className="flex items-center gap-2.5">
                 <Truck className="w-4 h-4 text-blue-500" />
                 <span>
-                  <strong>ডেলিভারি চার্জ:</strong> ঢাকা সিটির ভিতরে মাত্র ৳৬০, ঢাকা সিটির বাইরে ৳১২০
+                  <strong>ডেলিভারি চার্জ:</strong> ঢাকা সিটির ভিতরে মাত্র ৳৬০,
+                  ঢাকা সিটির বাইরে ৳১২০
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
                 <span>
-                  <strong>ক্যাশ অন ডেলিভারি:</strong> প্রোডাক্ট হাতে পেয়ে চেক করে সম্পূর্ণ টাকা পরিশোধ করুন
+                  <strong>ক্যাশ অন ডেলিভারি:</strong> প্রোডাক্ট হাতে পেয়ে চেক
+                  করে সম্পূর্ণ টাকা পরিশোধ করুন
                 </span>
               </div>
             </div>
@@ -679,7 +714,8 @@ function SingleProductContent() {
             বাস্তবে দেখতে ঠিক যেমন নিখুঁত ও আকর্ষণীয়
           </h2>
           <p className="text-xs sm:text-sm text-slate-500">
-            প্রতিটি খুঁটিনাটি নিখুঁতভাবে তৈরি, যাতে আপনি পান সর্বোচ্চ টেকসই ও আকর্ষণীয় অভিজ্ঞতা।
+            প্রতিটি খুঁটিনাটি নিখুঁতভাবে তৈরি, যাতে আপনি পান সর্বোচ্চ টেকসই ও
+            আকর্ষণীয় অভিজ্ঞতা।
           </p>
         </div>
 
@@ -705,7 +741,8 @@ function SingleProductContent() {
                   প্রিমিয়াম কোয়ালিটি এবং আধুনিক আর্কিটেকচার
                 </h3>
                 <p className="text-xs text-slate-300 mt-1 line-clamp-2">
-                  উচ্চমানের সামগ্রী দ্বারা প্রস্তুতকৃত, যা যেকোনো সাধারণ পণ্যের তুলনায় অনেক বেশি টেকসই ও শক্তিশালী।
+                  উচ্চমানের সামগ্রী দ্বারা প্রস্তুতকৃত, যা যেকোনো সাধারণ পণ্যের
+                  তুলনায় অনেক বেশি টেকসই ও শক্তিশালী।
                 </p>
               </div>
             </div>
@@ -731,7 +768,8 @@ function SingleProductContent() {
                   ১০০% ঝুঁকিমুক্ত ও আনন্দদায়ক অভিজ্ঞতা
                 </h3>
                 <p className="text-xs text-slate-300 mt-1 line-clamp-2">
-                  দৈনন্দিন স্বাচ্ছন্দ্য ও দীর্ঘমেয়াদী নির্ভরযোগ্যতার জন্য বিশেষভাবে উপযোগী।
+                  দৈনন্দিন স্বাচ্ছন্দ্য ও দীর্ঘমেয়াদী নির্ভরযোগ্যতার জন্য
+                  বিশেষভাবে উপযোগী।
                 </p>
               </div>
             </div>
@@ -749,7 +787,8 @@ function SingleProductContent() {
             আমাদের প্রোডাক্টের বিশেষত্ব ও উপকারিতা
           </h2>
           <p className="text-xs sm:text-sm text-slate-500">
-            উন্নত প্রযুক্তি এবং প্রিমিয়াম ম্যাটেরিয়াল দ্বারা তৈরি, যা আপনার দৈনন্দিন ব্যবহারে আনবে সর্বোচ্চ স্বাচ্ছন্দ্য।
+            উন্নত প্রযুক্তি এবং প্রিমিয়াম ম্যাটেরিয়াল দ্বারা তৈরি, যা আপনার
+            দৈনন্দিন ব্যবহারে আনবে সর্বোচ্চ স্বাচ্ছন্দ্য।
           </p>
         </div>
 
@@ -758,9 +797,12 @@ function SingleProductContent() {
             <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
               <Award className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-base text-slate-900">প্রিমিয়াম কোয়ালিটি</h3>
+            <h3 className="font-bold text-base text-slate-900">
+              প্রিমিয়াম কোয়ালিটি
+            </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              টেকসই ও মজবুত উপাদানে তৈরি, যা দীর্ঘমেয়াদী ব্যবহারের পূর্ণ নিশ্চয়তা প্রদান করে।
+              টেকসই ও মজবুত উপাদানে তৈরি, যা দীর্ঘমেয়াদী ব্যবহারের পূর্ণ
+              নিশ্চয়তা প্রদান করে।
             </p>
           </div>
 
@@ -770,7 +812,8 @@ function SingleProductContent() {
             </div>
             <h3 className="font-bold text-base text-slate-900">সহজ ব্যবহার</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              কোনো জটিলতা ছাড়াই অত্যন্ত সহজে পরিচালনা এবং বাসায় বা অফিসে ব্যবহার উপযোগী।
+              কোনো জটিলতা ছাড়াই অত্যন্ত সহজে পরিচালনা এবং বাসায় বা অফিসে ব্যবহার
+              উপযোগী।
             </p>
           </div>
 
@@ -778,9 +821,12 @@ function SingleProductContent() {
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-base text-slate-900">নিরাপত্তা ও ওয়ারেন্টি</h3>
+            <h3 className="font-bold text-base text-slate-900">
+              নিরাপত্তা ও ওয়ারেন্টি
+            </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              ১০০% ঝুঁকিমুক্ত কেনাকাটা এবং ত্রুটিমুক্ত প্যাকেজিং সাথে ৭ দিনের রিপ্লেসমেন্ট নিশ্চয়তা।
+              ১০০% ঝুঁকিমুক্ত কেনাকাটা এবং ত্রুটিমুক্ত প্যাকেজিং সাথে ৭ দিনের
+              রিপ্লেসমেন্ট নিশ্চয়তা।
             </p>
           </div>
 
@@ -788,9 +834,12 @@ function SingleProductContent() {
             <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-base text-slate-900">অর্থ ও সময় সাশ্রয়</h3>
+            <h3 className="font-bold text-base text-slate-900">
+              অর্থ ও সময় সাশ্রয়
+            </h3>
             <p className="text-xs text-slate-500 leading-relaxed">
-              বিশেষ ছাড়ের অফারে কম খরচে সেরা গ্যাজেট বা পণ্য পাওয়ার সুবর্ণ সুযোগ।
+              বিশেষ ছাড়ের অফারে কম খরচে সেরা গ্যাজেট বা পণ্য পাওয়ার সুবর্ণ
+              সুযোগ।
             </p>
           </div>
         </div>
@@ -834,24 +883,36 @@ function SingleProductContent() {
             <table className="w-full text-left">
               <tbody className="divide-y divide-slate-100">
                 <tr className="bg-slate-50/60">
-                  <td className="px-5 py-3.5 font-bold text-slate-600 w-1/3">মডেল / নাম</td>
-                  <td className="px-5 py-3.5 text-slate-900 font-bold">{product.name}</td>
+                  <td className="px-5 py-3.5 font-bold text-slate-600 w-1/3">
+                    মডেল / নাম
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-900 font-bold">
+                    {product.name}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="px-5 py-3.5 font-bold text-slate-600">ক্যাটাগরি</td>
-                  <td className="px-5 py-3.5 text-slate-800">{product.category}</td>
-                </tr>
-                <tr className="bg-slate-50/60">
-                  <td className="px-5 py-3.5 font-bold text-slate-600">পেমেন্ট মেথড</td>
-                  <td className="px-5 py-3.5 text-slate-800 font-semibold">ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে টাকা দিন)</td>
+                  <td className="px-5 py-3.5 font-bold text-slate-600">
+                    পেমেন্ট মেথড
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-800 font-semibold">
+                    ক্যাশ অন ডেলিভারি (পণ্য হাতে পেয়ে টাকা দিন)
+                  </td>
                 </tr>
                 <tr>
-                  <td className="px-5 py-3.5 font-bold text-slate-600">ওয়ারেন্টি</td>
-                  <td className="px-5 py-3.5 text-slate-800 font-semibold">৭ দিনের ফ্রি রিপ্লেসমেন্ট ওয়ারেন্টি</td>
+                  <td className="px-5 py-3.5 font-bold text-slate-600">
+                    ওয়ারেন্টি
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-800 font-semibold">
+                    ৭ দিনের ফ্রি রিপ্লেসমেন্ট ওয়ারেন্টি
+                  </td>
                 </tr>
                 <tr className="bg-slate-50/60">
-                  <td className="px-5 py-3.5 font-bold text-slate-600">ডেলিভারি সময়</td>
-                  <td className="px-5 py-3.5 text-slate-800">ঢাকা সিটিতে ২৪-৪৮ ঘণ্টা, ঢাকার বাইরে ২-৩ দিন</td>
+                  <td className="px-5 py-3.5 font-bold text-slate-600">
+                    ডেলিভারি সময়
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-800">
+                    ঢাকা সিটিতে ২৪-৪৮ ঘণ্টা, ঢাকার বাইরে ২-৩ দিন
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -860,9 +921,11 @@ function SingleProductContent() {
       </div>
 
       {/* 9. HIGH-CONVERTING DIRECT ORDER FORM (ZARO STYLE) */}
-      <div id="order-form-section" className="max-w-4xl mx-auto px-4 mt-16 scroll-mt-20">
+      <div
+        id="order-form-section"
+        className="max-w-4xl mx-auto px-4 mt-16 scroll-mt-20"
+      >
         <div className="bg-white rounded-3xl p-6 sm:p-10 md:p-12 border-2 border-rose-500 shadow-2xl space-y-8 relative overflow-hidden">
-          
           {/* Header Banner */}
           <div className="text-center space-y-2.5 border-b-2 border-dashed border-slate-200 pb-6">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-black uppercase tracking-wider">
@@ -873,7 +936,8 @@ function SingleProductContent() {
               অর্ডার করতে নিচের ফর্মটি সঠিক তথ্য দিয়ে পূরণ করুন
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto">
-              অগ্রিম এক টাকাও দিতে হবে না! ডেলিভারি ম্যানের কাছ থেকে পণ্য বুঝে পেয়ে সম্পূর্ণ মূল্য পরিশোধ করুন।
+              অগ্রিম এক টাকাও দিতে হবে না! ডেলিভারি ম্যানের কাছ থেকে পণ্য বুঝে
+              পেয়ে সম্পূর্ণ মূল্য পরিশোধ করুন।
             </p>
           </div>
 
@@ -899,7 +963,8 @@ function SingleProductContent() {
             {/* Input 2: Mobile Number */}
             <div className="space-y-1.5">
               <label className="block text-xs sm:text-sm font-bold text-slate-800">
-                আপনার সচল মোবাইল নাম্বার <span className="text-rose-500">*</span>
+                আপনার সচল মোবাইল নাম্বার{" "}
+                <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -920,7 +985,8 @@ function SingleProductContent() {
             {/* Input 3: Full Delivery Address */}
             <div className="space-y-1.5">
               <label className="block text-xs sm:text-sm font-bold text-slate-800">
-                আপনার সম্পূর্ণ ডেলিভারি ঠিকানা <span className="text-rose-500">*</span>
+                আপনার সম্পূর্ণ ডেলিভারি ঠিকানা{" "}
+                <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <textarea
@@ -938,7 +1004,8 @@ function SingleProductContent() {
             {/* Input 4: Delivery Zone Selection */}
             <div className="space-y-2">
               <label className="block text-xs sm:text-sm font-bold text-slate-800">
-                আপনার ডেলিভারি এলাকা সিলেক্ট করুন <span className="text-rose-500">*</span>
+                আপনার ডেলিভারি এলাকা সিলেক্ট করুন{" "}
+                <span className="text-rose-500">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <label
@@ -961,10 +1028,14 @@ function SingleProductContent() {
                       <div className="text-xs sm:text-sm font-bold text-slate-800">
                         ঢাকা সিটির ভেতরে
                       </div>
-                      <div className="text-[11px] text-slate-500">২৪-৪৮ ঘণ্টার মধ্যে ডেলিভারি</div>
+                      <div className="text-[11px] text-slate-500">
+                        ২৪-৪৮ ঘণ্টার মধ্যে ডেলিভারি
+                      </div>
                     </div>
                   </div>
-                  <span className="font-bold text-base text-slate-900 font-mono">৳ ৬০</span>
+                  <span className="font-bold text-base text-slate-900 font-mono">
+                    ৳ ৬০
+                  </span>
                 </label>
 
                 <label
@@ -987,10 +1058,14 @@ function SingleProductContent() {
                       <div className="text-xs sm:text-sm font-bold text-slate-800">
                         ঢাকা সিটির বাইরে
                       </div>
-                      <div className="text-[11px] text-slate-500">২-৩ দিনে হোম ডেলিভারি</div>
+                      <div className="text-[11px] text-slate-500">
+                        ২-৩ দিনে হোম ডেলিভারি
+                      </div>
                     </div>
                   </div>
-                  <span className="font-bold text-base text-slate-900 font-mono">৳ ১২০</span>
+                  <span className="font-bold text-base text-slate-900 font-mono">
+                    ৳ ১২০
+                  </span>
                 </label>
               </div>
             </div>
@@ -1086,7 +1161,9 @@ function SingleProductContent() {
 
             <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
               <Lock className="w-3.5 h-3.5" />
-              <span>আপনার সকল ব্যক্তিগত তথ্য সম্পূর্ণ সুরক্ষিত এবং গোপন রাখা হবে।</span>
+              <span>
+                আপনার সকল ব্যক্তিগত তথ্য সম্পূর্ণ সুরক্ষিত এবং গোপন রাখা হবে।
+              </span>
             </div>
           </form>
         </div>
@@ -1107,19 +1184,27 @@ function SingleProductContent() {
           <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-100 shadow-xs space-y-3">
             <div className="flex items-center text-amber-400 text-xs">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <Star
+                  key={i}
+                  className="w-4 h-4 fill-amber-400 text-amber-400"
+                />
               ))}
             </div>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic">
-              “অর্ডার করার পরদিনই ঢাকা সিটির ভিতরে প্রোডাক্ট ডেলিভারি পেয়েছি। প্যাকেজিং দারুণ ছিল এবং প্রোডাক্ট কোয়ালিটি ছবির চেয়েও অনেক ভালো!”
+              “অর্ডার করার পরদিনই ঢাকা সিটির ভিতরে প্রোডাক্ট ডেলিভারি পেয়েছি।
+              প্যাকেজিং দারুণ ছিল এবং প্রোডাক্ট কোয়ালিটি ছবির চেয়েও অনেক ভালো!”
             </p>
             <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
               <div className="w-9 h-9 rounded-full bg-rose-100 text-rose-600 font-black text-xs flex items-center justify-center">
                 র
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900">রাকিবুল হাসান</div>
-                <div className="text-[10px] text-emerald-600 font-bold">ভেরিফাইড ক্রেতা (উত্তরা, ঢাকা)</div>
+                <div className="text-xs font-bold text-slate-900">
+                  রাকিবুল হাসান
+                </div>
+                <div className="text-[10px] text-emerald-600 font-bold">
+                  ভেরিফাইড ক্রেতা (উত্তরা, ঢাকা)
+                </div>
               </div>
             </div>
           </div>
@@ -1127,19 +1212,27 @@ function SingleProductContent() {
           <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-100 shadow-xs space-y-3">
             <div className="flex items-center text-amber-400 text-xs">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <Star
+                  key={i}
+                  className="w-4 h-4 fill-amber-400 text-amber-400"
+                />
               ))}
             </div>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic">
-              “ক্যাশ অন ডেলিভারিতে চেক করে টাকা দেওয়ার সুযোগ থাকায় কোনো ভয় ছিল না। একদম নিখুঁত পণ্য। ধন্যবাদ সেলারকে।”
+              “ক্যাশ অন ডেলিভারিতে চেক করে টাকা দেওয়ার সুযোগ থাকায় কোনো ভয় ছিল
+              না। একদম নিখুঁত পণ্য। ধন্যবাদ সেলারকে।”
             </p>
             <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
               <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 font-black text-xs flex items-center justify-center">
                 ত
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900">তানিয়া সুলতানা</div>
-                <div className="text-[10px] text-emerald-600 font-bold">ভেরিফাইড ক্রেতা (চট্টগ্রাম)</div>
+                <div className="text-xs font-bold text-slate-900">
+                  তানিয়া সুলতানা
+                </div>
+                <div className="text-[10px] text-emerald-600 font-bold">
+                  ভেরিফাইড ক্রেতা (চট্টগ্রাম)
+                </div>
               </div>
             </div>
           </div>
@@ -1147,19 +1240,27 @@ function SingleProductContent() {
           <div className="bg-white p-6 sm:p-7 rounded-3xl border border-slate-100 shadow-xs space-y-3">
             <div className="flex items-center text-amber-400 text-xs">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <Star
+                  key={i}
+                  className="w-4 h-4 fill-amber-400 text-amber-400"
+                />
               ))}
             </div>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed italic">
-              “প্রোডাক্টের বিল্ড কোয়ালিটি খুব ভালো। সাপোর্ট টিম ফোনে খুব ভদ্রভাবে কথা বলেছে। নিঃসন্দেহে বিশ্বস্ত একটি পেজ।”
+              “প্রোডাক্টের বিল্ড কোয়ালিটি খুব ভালো। সাপোর্ট টিম ফোনে খুব
+              ভদ্রভাবে কথা বলেছে। নিঃসন্দেহে বিশ্বস্ত একটি পেজ।”
             </p>
             <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
               <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 font-black text-xs flex items-center justify-center">
                 শ
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900">শহিদুল ইসলাম</div>
-                <div className="text-[10px] text-emerald-600 font-bold">ভেরিফাইড ক্রেতা (রাজশাহী)</div>
+                <div className="text-xs font-bold text-slate-900">
+                  শহিদুল ইসলাম
+                </div>
+                <div className="text-[10px] text-emerald-600 font-bold">
+                  ভেরিফাইড ক্রেতা (রাজশাহী)
+                </div>
               </div>
             </div>
           </div>
@@ -1169,7 +1270,9 @@ function SingleProductContent() {
       {/* 11. STICKY BOTTOM QUICK ACTION BAR FOR MOBILE */}
       <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3.5 px-4 z-50 md:hidden flex items-center justify-between shadow-2xl">
         <div>
-          <span className="text-[10px] text-slate-400 block font-semibold">অফার মূল্য</span>
+          <span className="text-[10px] text-slate-400 block font-semibold">
+            অফার মূল্য
+          </span>
           <span className="font-mono font-black text-xl text-rose-600">
             ৳ {unitPrice}
           </span>
