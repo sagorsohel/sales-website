@@ -4,41 +4,41 @@ import { Truck, RotateCcw, Headphones } from "lucide-react";
 export function TrustBadges() {
   const badges = [
     {
-      title: "Free Shipping Worldwide",
-      subtitle: "On orders over $150",
-      icon: <Truck className="w-8 h-8 text-[#fbb034]" />,
+      title: "সারাদেশে হোম ডেলিভারি",
+      subtitle: "দ্রুততম সময়ে নির্ভরযোগ্য ডেলিভারি সার্ভিস",
+      icon: <Truck className="w-7 h-7 text-[#ff8a00]" />,
       iconBg: "bg-[#fff8e1]",
     },
     {
-      title: "Cash On Delivery",
-      subtitle: "100% money back guarantee",
-      icon: <RotateCcw className="w-8 h-8 text-[#f75388]" />,
-      iconBg: "bg-[#fce4ec]",
+      title: "ক্যাশ অন ডেলিভারি সুবিধা",
+      subtitle: "পণ্য হাতে পেয়ে মূল্য পরিশোধের নিশ্চয়তা",
+      icon: <RotateCcw className="w-7 h-7 text-[#e11d48]" />,
+      iconBg: "bg-[#ffe4e6]",
     },
     {
-      title: "24/7 Customer Service",
-      subtitle: "Call us 24/7 at 123-456-789",
-      icon: <Headphones className="w-8 h-8 text-[#00c3e3]" />,
-      iconBg: "bg-[#e0f7fa]",
+      title: "২৪/৭ কাস্টমার হেল্পলাইন",
+      subtitle: "সরাসরি ফোন বা হোয়াটসঅ্যাপে সহায়তা",
+      icon: <Headphones className="w-7 h-7 text-[#0891b2]" />,
+      iconBg: "bg-[#e0f2fe]",
     },
   ];
 
   return (
-    <section className="py-12 max-w-7xl mx-auto px-4 sm:px-8 border-b border-gray-100">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+    <section className="py-10 max-w-7xl mx-auto px-4 sm:px-8 border-b border-gray-100">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
         {badges.map((b, idx) => (
           <div
             key={idx}
-            className="flex items-center gap-4 p-4 rounded-2xl hover:bg-gray-50/70 transition-colors"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/60 hover:bg-white hover:shadow-md border border-gray-100/80 transition-all duration-300"
           >
             <div
-              className={`w-14 h-14 rounded-2xl ${b.iconBg} flex items-center justify-center shrink-0`}
+              className={`w-14 h-14 rounded-2xl ${b.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}
             >
               {b.icon}
             </div>
             <div>
               <h3 className="text-sm font-bold text-gray-900">{b.title}</h3>
-              <p className="text-xs text-gray-500 mt-0.5">{b.subtitle}</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{b.subtitle}</p>
             </div>
           </div>
         ))}
@@ -46,3 +46,4 @@ export function TrustBadges() {
     </section>
   );
 }
+

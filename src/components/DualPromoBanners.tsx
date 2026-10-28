@@ -39,7 +39,7 @@ export function DualPromoBanners() {
               Teddy Bear
             </h3>
             <p className="text-sm font-semibold text-gray-700">
-              Only from $19.00
+              Only from ৳১৯৯
             </p>
             <div className="pt-2">
               <a
