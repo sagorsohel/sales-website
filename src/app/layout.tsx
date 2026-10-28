@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WideSales | Enterprise Sales Platform",
+  title: "Kiddle | Baby & Kids Toys Online Store",
   description:
-    "Full-featured enterprise sales application built with Next.js, Tailwind CSS, shadcn/ui, and Redux Toolkit.",
+    "Explore premium toys, dolls, bicycles, and plushies with fast worldwide shipping and 100% money-back guarantee.",
 };
 
 export default function RootLayout({

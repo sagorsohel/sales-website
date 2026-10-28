@@ -1,98 +1,210 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ShoppingBag, Sparkles, Layers, ShieldCheck, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  PhoneCall,
+  ShoppingBag,
+  Search,
+  ChevronDown,
+  Sparkles,
+  ExternalLink,
+  Menu,
+  X,
+  User,
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { toggleCart } from "@/redux/slices/cartSlice";
+import { setSearchQuery } from "@/redux/slices/productSlice";
 
 export function Navbar() {
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
+  const searchQuery = useAppSelector((state) => state.products.searchQuery);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const totalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/80 backdrop-blur-md transition-all">
-      <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25 transition-transform group-hover:scale-105">
-            <Layers className="h-5 w-5" />
+    <header className="w-full bg-white sticky top-0 z-40 shadow-xs">
+      {/* 1. Yellow/Golden Top Bar */}
+      <div className="bg-[#fbb034] text-gray-900 text-xs py-2 px-4 sm:px-8 font-medium">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>Welcome to our online store!</span>
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg tracking-tight text-foreground">
-                Wide<span className="text-primary">Sales</span>
-              </span>
-              <span className="inline-flex items-center rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                PRO
-              </span>
+
+          <div className="flex items-center gap-5">
+            <div className="hidden sm:flex items-center gap-1 cursor-pointer hover:opacity-80">
+              <span>Currency: USD</span>
+              <ChevronDown className="w-3 h-3" />
             </div>
-            <p className="text-[11px] text-muted-foreground hidden sm:block">
-              Enterprise Sales & Cloud Ecosystem
-            </p>
+            <div className="hidden sm:flex items-center gap-1 cursor-pointer hover:opacity-80">
+              <span>Language: English</span>
+              <ChevronDown className="w-3 h-3" />
+            </div>
+            <div className="flex items-center gap-1 cursor-pointer hover:opacity-80">
+              <User className="w-3.5 h-3.5" />
+              <span>My Account</span>
+              <ChevronDown className="w-3 h-3" />
+            </div>
+            <a
+              href="http://localhost:5173"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1 bg-white/25 hover:bg-white/40 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-gray-900 transition-colors"
+            >
+              Admin Panel
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Main Header with Playful Logo, Search, and Cart */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+        {/* Playful Kiddle Brand Logo */}
+        <Link href="/" className="flex items-center gap-2 select-none group">
+          <div className="flex items-center gap-0.5 text-3xl font-extrabold tracking-tight">
+            <Sparkles className="w-7 h-7 text-[#fbb034] fill-[#fbb034] inline-block mr-1 group-hover:rotate-12 transition-transform" />
+            <span className="text-[#f75388]">K</span>
+            <span className="text-[#00c3e3]">i</span>
+            <span className="text-[#fbb034]">d</span>
+            <span className="text-[#81c784]">d</span>
+            <span className="text-[#ab47bc]">l</span>
+            <span className="text-[#ff7043]">e</span>
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
-          <a
-            href="#products"
-            className="transition-colors hover:text-primary hover:underline underline-offset-4"
-          >
-            Products
-          </a>
-          <a
-            href="#features"
-            className="transition-colors hover:text-primary hover:underline underline-offset-4"
-          >
-            Features
-          </a>
-          <a
-            href="#tech-stack"
-            className="transition-colors hover:text-primary hover:underline underline-offset-4"
-          >
-            Architecture
-          </a>
-          <div className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            Backend API :5000
+        {/* Center Search Bar */}
+        <div className="hidden md:flex flex-1 max-w-lg mx-6">
+          <div className="relative w-full flex items-center">
+            <input
+              type="text"
+              placeholder="Search products, toys, benefits..."
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              className="w-full py-2.5 pl-5 pr-12 rounded-full border-2 border-gray-200 text-sm focus:outline-none focus:border-[#00c3e3] text-gray-700 bg-gray-50/50"
+            />
+            <button
+              onClick={() => {
+                const el = document.getElementById("featured-products");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="absolute right-1.5 p-2 rounded-full bg-[#00c3e3] hover:bg-[#00a8c4] text-white transition-colors cursor-pointer"
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4" />
+            </button>
           </div>
-        </nav>
+        </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="relative gap-2 border-primary/30 hover:border-primary"
+        {/* Right Info: Customer Support & Cart */}
+        <div className="flex items-center gap-6">
+          {/* Support Info */}
+          <div className="hidden lg:flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full border-2 border-[#00c3e3] flex items-center justify-center text-[#00c3e3]">
+              <PhoneCall className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="text-[11px] text-gray-500 font-medium">Customer Support</div>
+              <div className="text-xs font-bold text-gray-900">0123-456-789</div>
+            </div>
+          </div>
+
+          {/* Shopping Cart Button */}
+          <button
             onClick={() => dispatch(toggleCart())}
-            aria-label="Open Cart"
+            className="flex items-center gap-3 p-1 cursor-pointer group"
           >
-            <ShoppingBag className="h-4 w-4 text-primary" />
-            <span className="hidden sm:inline font-semibold">Cart</span>
-            {totalCount > 0 && (
-              <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground animate-in zoom-in-75">
-                {totalCount}
-              </span>
-            )}
-          </Button>
+            <div className="relative w-11 h-11 rounded-full border-2 border-[#00c3e3] group-hover:bg-[#00c3e3]/10 flex items-center justify-center text-[#00c3e3] transition-colors">
+              <ShoppingBag className="w-5 h-5" />
+              {totalCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#f75388] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm animate-bounce">
+                  {totalCount}
+                </span>
+              )}
+            </div>
+            <div className="text-left hidden sm:block">
+              <div className="text-[11px] text-gray-500 font-medium">Shopping Cart</div>
+              <div className="text-xs font-bold text-gray-900">
+                ${totalAmount.toFixed(2)}
+              </div>
+            </div>
+          </button>
 
-          <a
-            href="http://localhost:5173"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex"
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
           >
-            <Button size="sm" className="bg-primary text-primary-foreground gap-1.5 shadow-md shadow-primary/20">
-              Admin Panel
-              <ExternalLink className="h-3.5 w-3.5" />
-            </Button>
-          </a>
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
+
+      {/* 3. Navigation Ribbon (Pink Accent Border / Bar) */}
+      <nav className="border-t border-b border-pink-100 bg-[#ffffff]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-center md:justify-center">
+          <ul className="hidden md:flex items-center gap-8 py-3 text-xs font-bold text-gray-700 tracking-wider">
+            <li>
+              <Link href="/" className="text-[#f75388] hover:text-[#f75388] transition-colors">
+                HOME
+              </Link>
+            </li>
+            <li>
+              <a href="#featured-products" className="hover:text-[#f75388] transition-colors">
+                FASHION
+              </a>
+            </li>
+            <li>
+              <a href="#featured-products" className="hover:text-[#f75388] transition-colors">
+                ACCESSORIES
+              </a>
+            </li>
+            <li>
+              <a href="#categories" className="hover:text-[#f75388] transition-colors">
+                BRANDS
+              </a>
+            </li>
+            <li>
+              <a href="#latest-showcase" className="hover:text-[#f75388] transition-colors">
+                LIFESTYLE
+              </a>
+            </li>
+            <li>
+              <a href="#blog" className="hover:text-[#f75388] transition-colors">
+                BLOG
+              </a>
+            </li>
+            <li>
+              <a href="#footer" className="hover:text-[#f75388] transition-colors">
+                CONTACT
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden px-4 py-3 bg-white border-t border-gray-100 space-y-2 text-sm font-semibold text-gray-700">
+            <Link href="/" className="block py-1 text-[#f75388]">HOME</Link>
+            <a href="#featured-products" className="block py-1">FASHION</a>
+            <a href="#featured-products" className="block py-1">ACCESSORIES</a>
+            <a href="#categories" className="block py-1">BRANDS</a>
+            <a href="#latest-showcase" className="block py-1">LIFESTYLE</a>
+            <a href="#blog" className="block py-1">BLOG</a>
+            <a href="#footer" className="block py-1">CONTACT</a>
+            <a href="http://localhost:5173" target="_blank" className="block py-1 text-[#00c3e3]">
+              ADMIN PANEL ↗
+            </a>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }
