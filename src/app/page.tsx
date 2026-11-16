@@ -1,46 +1,30 @@
 import { HeroBanner } from "@/components/HeroBanner";
 import { CategoryPillBar } from "@/components/CategoryPillBar";
-import { TrustBadges } from "@/components/TrustBadges";
 import { ProductCatalog } from "@/components/ProductCatalog";
+import { TrustBadges } from "@/components/TrustBadges";
 import { DualPromoBanners } from "@/components/DualPromoBanners";
-import { TestimonialSection } from "@/components/TestimonialSection";
-import { ThreeColumnShowcase } from "@/components/ThreeColumnShowcase";
-import { WidePromoBanner } from "@/components/WidePromoBanner";
-import { LatestBlogSection } from "@/components/LatestBlogSection";
-import { BrandLogosStrip } from "@/components/BrandLogosStrip";
+import { NewArrivalsSection } from "@/components/NewArrivalsSection";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      {/* 1. Hero Banner */}
+      {/* 1. Hero Banner: Big Smiles, Bigger Adventures */}
       <HeroBanner />
 
-      {/* 2. Floating Circular Category Selector */}
+      {/* 2. 6 Rounded Pastel Category Cards */}
       <CategoryPillBar />
 
-      {/* 3. 3-Pillar Trust Badges */}
-      <TrustBadges />
-
-      {/* 4. Featured Products (Dynamic from MySQL backend) */}
+      {/* 3. Best Sellers: Loved by parents, trusted by kids! */}
       <ProductCatalog />
 
-      {/* 5. Dual Promotional Banners (Barbie Doll & Teddy Bear) */}
+      {/* 4. 4 Trust Badges Container */}
+      <TrustBadges />
+
+      {/* 5. Dual Promotional Banners: Kids Fashion (Blue) & Smart Learning (Yellow) */}
       <DualPromoBanners />
 
-      {/* 6. Testimonial Wave Section */}
-      <TestimonialSection />
-
-      {/* 7. 3-Column Showcase: Latest, Bestsellers, Special */}
-      <ThreeColumnShowcase />
-
-      {/* 8. Wide Promotional Banner: Teddy & Soft Toys */}
-      <WidePromoBanner />
-
-      {/* 9. Latest Blog Section */}
-      <LatestBlogSection />
-
-      {/* 10. Brand Logos Strip */}
-      <BrandLogosStrip />
+      {/* 6. New Arrivals: Fresh picks for your little ones! */}
+      <NewArrivalsSection />
     </div>
   );
 }

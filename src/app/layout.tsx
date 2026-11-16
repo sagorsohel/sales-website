@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kiddle | Baby & Kids Toys Online Store",
+  title: "LittleNest | Happy Kids, Happy Family",
   description:
-    "Explore premium toys, dolls, bicycles, and plushies with fast worldwide shipping and 100% money-back guarantee.",
+    "Discover toys, clothes & essentials for every little moment. Free delivery all over Bangladesh on orders over ৳1,000!",
 };
 
 export default function RootLayout({

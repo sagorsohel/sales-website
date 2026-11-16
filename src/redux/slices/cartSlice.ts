@@ -15,16 +15,7 @@ interface CartState {
 }
 
 const initialState: CartState = {
-  items: [
-    {
-      id: "prod-1",
-      name: "Enterprise Cloud Suite Pro",
-      price: 299,
-      quantity: 1,
-      category: "SaaS Software",
-      image: "☁️",
-    },
-  ],
+  items: [],
   isOpen: false,
 };
 

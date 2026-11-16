@@ -3,19 +3,16 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
+  Star,
+  Heart,
+  ShoppingCart,
   Check,
-  Search,
-  Sparkles,
+  ArrowRight,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-  ShoppingBag,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addToCart } from "@/redux/slices/cartSlice";
 import {
-  setSelectedCategory,
-  setSearchQuery,
   fetchWebsiteProducts,
   fetchWebsiteCategories,
   type Product,
@@ -25,220 +22,252 @@ export function ProductCatalog() {
   const dispatch = useAppDispatch();
   const {
     products,
-    categories,
     selectedCategory,
     searchQuery,
     loading,
-    error,
   } = useAppSelector((state) => state.products);
+
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     dispatch(fetchWebsiteProducts());
     dispatch(fetchWebsiteCategories());
   }, [dispatch]);
 
-  const filteredProducts = products.filter((p) => {
-    const matchesCategory =
-      selectedCategory === "All" ||
-      p.category?.toLowerCase() === selectedCategory.toLowerCase();
-    const matchesSearch =
-      p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Featured 4 Best Sellers matching screenshot precisely
+  const defaultBestSellers = [
+    {
+      id: "best-1",
+      name: "Kids Ride On Car",
+      category: "Toys",
+      salePrice: 2999,
+      regularPrice: 3999,
+      discountPercentage: 25,
+      rating: 4.7,
+      reviewsCount: "1.2k",
+      featuredImage: "/images/littlenest/prod_car.png",
+    },
+    {
+      id: "best-2",
+      name: "Girls Princess Dress",
+      category: "Clothing",
+      salePrice: 1599,
+      regularPrice: 1999,
+      discountPercentage: 20,
+      rating: 4.8,
+      reviewsCount: "856",
+      featuredImage: "/images/littlenest/prod_dress.png",
+    },
+    {
+      id: "best-3",
+      name: "Soft Teddy Bear",
+      category: "Toys",
+      salePrice: 699,
+      regularPrice: 999,
+      discountPercentage: 30,
+      rating: 4.9,
+      reviewsCount: "2.1k",
+      featuredImage: "/images/littlenest/prod_teddy.png",
+    },
+    {
+      id: "best-4",
+      name: "Building Blocks Set",
+      category: "Learning",
+      salePrice: 1699,
+      regularPrice: 1999,
+      discountPercentage: 15,
+      rating: 4.6,
+      reviewsCount: "732",
+      featuredImage: "/images/littlenest/prod_blocks.png",
+    },
+  ];
 
-  const handleAddToCart = (product: Product, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
+  // Merge dynamic DB products if available
+  const displayItems =
+    products.length > 0
+      ? products.filter((p) => {
+          const matchCat =
+            selectedCategory === "All" ||
+            p.category?.toLowerCase() === selectedCategory.toLowerCase();
+          const matchSearch =
+            !searchQuery ||
+            p.name?.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchCat && matchSearch;
+        })
+      : defaultBestSellers;
+
+  const itemsToShow = displayItems.length > 0 ? displayItems.slice(0, 4) : defaultBestSellers;
+
+  const toggleWishlist = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlist((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleAddToCart = (item: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     dispatch(
       addToCart({
-        id: product.id,
-        name: product.name,
-        price: product.salePrice,
-        category: product.category,
-        image: product.icon || "🛍️",
+        id: String(item.id),
+        name: item.name,
+        price: Number(item.salePrice),
+        category: item.category || "General",
+        image: item.featuredImage || "🧸",
       })
     );
-    setAddedId(product.id);
-    setTimeout(() => {
-      setAddedId(null);
-    }, 1200);
+    setAddedId(String(item.id));
+    setTimeout(() => setAddedId(null), 1200);
   };
 
   return (
-    <section id="featured-products" className="py-12 max-w-7xl mx-auto px-4 sm:px-8">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+    <section id="best-sellers-section" className="py-6 sm:py-10 w-full px-2 sm:px-4 md:px-6">
+      {/* Header Row */}
+      <div className="flex items-end justify-between mb-6 sm:mb-8 pb-1">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#0891b2] mb-1">
-            <Sparkles className="w-4 h-4 text-[#ff8a00]" />
-            <span>Top Picks & Best Deals</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight font-serif">
-            Featured Products
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0B3558] tracking-tight">
+            Best Sellers
           </h2>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+            Loved by parents, trusted by kids!
+          </p>
         </div>
 
-        {/* Category Pills inside catalog */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-          <button
-            onClick={() => dispatch(setSelectedCategory("All"))}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-              selectedCategory === "All"
-                ? "bg-[#0891b2] text-white shadow-xs"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            All Items
-          </button>
-          {categories.slice(0, 6).map((cat) => (
-            <button
-              key={cat.id || cat.name}
-              onClick={() => dispatch(setSelectedCategory(cat.name))}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                selectedCategory === cat.name
-                  ? "bg-[#0891b2] text-white shadow-xs"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
+        <a
+          href="#best-sellers-section"
+          className="text-xs sm:text-sm font-bold text-[#0B3558] hover:text-[#07243D] flex items-center gap-1 transition-colors hover:underline"
+        >
+          <span>View All Products</span>
+          <ArrowRight className="w-4 h-4" />
+        </a>
       </div>
 
-      {/* Loading & Empty State */}
-      {loading && products.length === 0 ? (
-        <div className="text-center py-20 border border-gray-100 rounded-3xl bg-gray-50/50 space-y-3">
-          <RefreshCw className="w-6 h-6 text-[#0891b2] animate-spin mx-auto" />
-          <p className="text-sm font-medium text-gray-700">
-            লোডিং হচ্ছে... পণ্যের তালিকা প্রস্তুত করা হচ্ছে
-          </p>
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50">
-          <p className="text-gray-500 text-sm">
-            {error ? `দুঃখিত, তথ্য লোড হতে সমস্যা হয়েছে: ${error}` : "কোনো পণ্য খুঁজে পাওয়া যায়নি।"}
-          </p>
-          <button
-            onClick={() => {
-              dispatch(setSelectedCategory("All"));
-              dispatch(setSearchQuery(""));
-              dispatch(fetchWebsiteProducts());
-            }}
-            className="mt-4 px-5 py-2 rounded-full bg-[#0891b2] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#0e7490] transition-all cursor-pointer"
-          >
-            সব পণ্য দেখুন
-          </button>
-        </div>
-      ) : (
-        /* 4-column product grid matching screenshot style */
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
-          {filteredProducts.map((product) => (
+      {/* 4-Column Product Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {itemsToShow.map((product: any) => {
+          const discount =
+            product.discountPercentage ||
+            (product.regularPrice > product.salePrice
+              ? Math.round(
+                  ((product.regularPrice - product.salePrice) /
+                    product.regularPrice) *
+                    100
+                )
+              : null);
+
+          const isFav = wishlist[String(product.id)];
+          const ratingVal = product.rating || 4.8;
+          const reviews = product.reviewsCount || `${product.salesCount || 850}`;
+
+          return (
             <div
               key={product.id}
-              className="bg-white rounded-2xl border border-gray-100 p-2.5 sm:p-3.5 flex flex-col justify-between hover:shadow-lg hover:border-gray-200 transition-all duration-300 group"
+              className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 flex flex-col hover:shadow-xl hover:border-slate-300 transition-all duration-300 group"
             >
               <div>
-                {/* Product Image Container */}
-                <Link
-                  href={`/product/${product.id}`}
-                  className="w-full aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center relative block"
-                >
-                  <img
-                    src={
-                      product.featuredImage ||
-                      "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=600&auto=format&fit=crop&q=80"
-                    }
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                {/* Image Box with Badges */}
+                <div className="relative w-full h-44 sm:h-48 flex items-center justify-center mb-2">
+                  {/* Top-Left Discount Badge */}
+                  {discount && (
+                    <span className="absolute top-1 left-1 z-10 bg-[#F5B301] text-slate-950 text-[11px] font-black px-2 py-0.5 rounded-full shadow-2xs">
+                      -{discount}%
+                    </span>
+                  )}
 
-                  {/* Rating Pill Badge (bottom-left of image - matching reference screenshot) */}
-                  <div className="absolute bottom-2 left-2 z-10 inline-flex items-center rounded-lg overflow-hidden text-xs font-bold shadow-xs select-none">
-                    <div className="bg-[#ff8a00] text-white px-2 py-0.5 flex items-center gap-1 font-bold">
-                      <span>{(product.rating || 5.0).toFixed(1)}</span>
-                      <span className="text-[11px] leading-none">★</span>
-                    </div>
-                    <div className="bg-[#dedede]/90 backdrop-blur-xs text-gray-800 px-1.5 py-0.5 font-semibold text-[11px]">
-                      {product.salesCount || 9}
-                    </div>
-                  </div>
-                </Link>
+                  {/* Top-Right Wishlist Heart Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => toggleWishlist(String(product.id), e)}
+                    className="absolute top-1 right-1 z-10 w-7 h-7 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 shadow-2xs transition-colors cursor-pointer"
+                    title="Add to Wishlist"
+                  >
+                    <Heart
+                      className={`w-3.5 h-3.5 ${
+                        isFav ? "fill-rose-500 text-rose-500" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {/* Product Image */}
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="w-full h-full flex items-center justify-center p-1"
+                  >
+                    <img
+                      src={
+                        product.featuredImage ||
+                        "/images/littlenest/prod_car.png"
+                      }
+                      alt={product.name}
+                      className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300"
+                    />
+                  </Link>
+                </div>
 
                 {/* Product Title */}
                 <Link
                   href={`/product/${product.id}`}
-                  className="line-clamp-2 text-xs sm:text-[13px] font-medium text-gray-800 leading-snug mt-2.5 min-h-[34px] group-hover:text-[#0891b2] transition-colors block"
+                  className="font-bold text-sm sm:text-[15px] text-slate-900 group-hover:text-[#0B3558] transition-colors truncate block"
                   title={product.name}
                 >
                   {product.name}
                 </Link>
 
-                {/* Price Row (matching reference: ↓ 59%  ৳190  ৳78) */}
-                <div className="flex items-baseline gap-1.5 sm:gap-2 pt-1.5 flex-wrap">
-                  {product.discountPercentage > 0 && (
-                    <span className="text-xs sm:text-sm font-black text-[#d91b5c]">
-                      ↓ {product.discountPercentage}%
-                    </span>
-                  )}
-                  {product.regularPrice > product.salePrice && (
-                    <span className="text-xs line-through text-slate-400 font-normal">
-                      ৳{product.regularPrice}
-                    </span>
-                  )}
-                  <span className="text-base sm:text-lg font-black text-[#9f1239] tracking-tight">
-                    ৳{product.salePrice}
+                {/* Golden Stars Rating */}
+                <div className="flex items-center gap-1 my-1.5">
+                  <div className="flex items-center gap-0.5 text-[#F5B301]">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-3.5 h-3.5 fill-[#F5B301] text-[#F5B301]"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-500 font-semibold ml-1">
+                    {ratingVal} ({reviews})
                   </span>
                 </div>
 
-                {/* Free Delivery Tag */}
-                <div className="text-[11px] text-slate-400 font-normal mt-0.5">
-                  FREE delivery
+                {/* Pricing: Bold Navy Sale Price + Strikethrough Regular Price */}
+                <div className="flex items-baseline gap-2 pt-1">
+                  <span className="text-lg sm:text-xl font-black text-[#0B3558] tracking-tight">
+                    ৳{Number(product.salePrice).toLocaleString()}
+                  </span>
+                  {product.regularPrice > product.salePrice && (
+                    <span className="text-xs line-through text-slate-400 font-normal">
+                      ৳{Number(product.regularPrice).toLocaleString()}
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Full-width Add to Cart Button (pastel cyan/sky background with teal text) */}
-              <div className="pt-2.5">
+              {/* Full Width Navy Add to Cart Button */}
+              <div className="pt-3">
                 <button
                   type="button"
                   onClick={(e) => handleAddToCart(product, e)}
-                  className="w-full py-2 sm:py-2.5 rounded-xl bg-[#dff3f9] hover:bg-[#cdebf6] active:scale-[0.98] text-[#0891b2] text-xs sm:text-sm font-bold text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  className="w-full py-2.5 sm:py-3 rounded-xl bg-[#0B3558] hover:bg-[#07243D] active:scale-[0.98] text-white text-xs sm:text-sm font-bold text-center transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
                 >
-                  {addedId === product.id ? (
+                  {addedId === String(product.id) ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-600" />
-                      <span className="text-emerald-700">Added!</span>
+                      <Check className="w-4 h-4 text-emerald-400" />
+                      <span>Added to Cart!</span>
                     </>
                   ) : (
-                    "Add to Cart"
+                    <>
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
+                    </>
                   )}
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Pagination / Browse More */}
-      <div className="flex items-center justify-center gap-2 mt-10">
-        <button
-          className="w-8 h-8 rounded-full border border-gray-200 hover:border-gray-900 flex items-center justify-center text-gray-500 hover:text-black cursor-pointer text-xs transition-colors"
-          aria-label="Previous Products"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <span className="text-xs font-semibold text-gray-500 px-2">
-          Page 1
-        </span>
-        <button
-          className="w-8 h-8 rounded-full border border-gray-200 hover:border-gray-900 flex items-center justify-center text-gray-500 hover:text-black cursor-pointer text-xs transition-colors"
-          aria-label="Next Products"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
+          );
+        })}
       </div>
     </section>
   );
 }
+
 
